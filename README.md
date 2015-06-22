@@ -17,8 +17,8 @@ Embulk output plugin to load into Salesforce.com.
 - **login_endpoint**: login endpoint (string, default: https://login.salesforce.com)
 - **sobject**: salesforce object API name (string, required)
 - **upsert_key**: upsert API field name (string, default: null)
-- **action**: output action that is "insert", "update", "upsert" or "delete" (string, required)
-- **result_dir**: directory for resulting csv(success and error file) (string, default: "./target")
+- **action**: output action that is "insert", "update", "upsert" or "delete" (string, default: insert)
+- **result_dir**: directory for resulting csv(success and error file). If the directory is not exist, the plugin show error. If not specified, resulting csv is not created. (string, default: null)
 - **version**: API version (string, default: "34.0")
 
 ## Example
@@ -28,6 +28,7 @@ out:
   type: salesforce
   username: hoge@example.com
   password: fuga
+  sobject: Account
   action: insert
 ```
 

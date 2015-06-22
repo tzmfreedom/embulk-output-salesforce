@@ -10,6 +10,7 @@ import com.sforce.soap.partner.UpsertResult;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -89,6 +90,15 @@ public class SalesforceOutputPlugin
     {
         PluginTask task = config.loadConfig(PluginTask.class);
         logger = Exec.getLogger(getClass());
+        
+        if (task.getResultDir().isPresent() && task.getResultDir().get() != null) {
+            File resultDir = new File(task.getResultDir().get());
+            if (!resultDir.exists() || !resultDir.isDirectory()) {
+                logger.error("{} is not exist or is not directory.", task.getResultDir().get());
+                throw new RuntimeException(task.getResultDir().get() + " is not exist or is not directory.");
+            }
+        }
+        
         final String username = task.getUsername();
         final String password = task.getPassword();
         final String loginEndpoint = task.getLoginEndpoint().get();
@@ -349,15 +359,21 @@ public class SalesforceOutputPlugin
             ICsvListWriter errorListWriter = null;
             try {
                 String successFileName = this.resultDir + "/success_" + dateSuffix + ".csv";
+                Boolean isExistSuccessFile = new File(successFileName).exists();
                 successListWriter = new CsvListWriter(new FileWriter(successFileName, true), 
                         CsvPreference.STANDARD_PREFERENCE);
-                //successListWriter.write(createSuccessHeader());
+                if (!isExistSuccessFile) {
+                    successListWriter.write(createSuccessHeader());
+                }
                 
                 String errorFileName = this.resultDir + "/error_" + dateSuffix + ".csv";
+                Boolean isExistErrorFile = new File(errorFileName).exists();
                 errorListWriter = new CsvListWriter(new FileWriter(errorFileName, true), 
                         CsvPreference.STANDARD_PREFERENCE);
-                //errorListWriter.write(createErrorHeader());
-
+                if (!isExistErrorFile) {
+                    errorListWriter.write(createErrorHeader());
+                }
+                    
                 CellProcessor[] processors = new CellProcessor[pageReader.getSchema().getColumns().size() + 1];
                 ArrayList<ArrayList<String>> errorValues = new ArrayList<>();
                 for (Integer i = 0, imax = records.size(); i < imax; i++) {
