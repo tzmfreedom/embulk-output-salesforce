@@ -55,7 +55,7 @@ public class SalesforceOutputPlugin
         public String getPassword();
 
         @Config("login_endpoint")
-        @ConfigDefault("https://login.salesforce.com")
+        @ConfigDefault("\"https://login.salesforce.com\"")
         public Optional<String> getLoginEndpoint();
         
         @Config("sobject")
@@ -78,7 +78,7 @@ public class SalesforceOutputPlugin
         public Optional<String> getVersion();
         
         @Config("result_dir")
-        @ConfigDefault("\"./target\"")
+        @ConfigDefault("null")
         public Optional<String> getResultDir();
     }
 
@@ -145,7 +145,7 @@ public class SalesforceOutputPlugin
     public class SalesforcePageOutput
             implements TransactionalPageOutput
     {
-        private final String datePostFix = new SimpleDateFormat("yyyyMMddhhmmssSSS").format(new Date());
+        private final String dateSuffix = new SimpleDateFormat("yyyyMMddhhmmssSSS").format(new Date());
     
         private final PageReader pageReader;
         private final PartnerConnection client;
@@ -348,12 +348,12 @@ public class SalesforceOutputPlugin
             ICsvListWriter successListWriter = null;
             ICsvListWriter errorListWriter = null;
             try {
-                String successFileName = this.resultDir + "/success_" + datePostFix + ".csv";
+                String successFileName = this.resultDir + "/success_" + dateSuffix + ".csv";
                 successListWriter = new CsvListWriter(new FileWriter(successFileName, true), 
                         CsvPreference.STANDARD_PREFERENCE);
                 //successListWriter.write(createSuccessHeader());
                 
-                String errorFileName = this.resultDir + "/error_" + datePostFix + ".csv";
+                String errorFileName = this.resultDir + "/error_" + dateSuffix + ".csv";
                 errorListWriter = new CsvListWriter(new FileWriter(errorFileName, true), 
                         CsvPreference.STANDARD_PREFERENCE);
                 //errorListWriter.write(createErrorHeader());

@@ -17,9 +17,9 @@ Embulk output plugin to load into Salesforce.com.
 - **login_endpoint**: login endpoint (string, default: https://login.salesforce.com)
 - **sobject**: salesforce object API name (string, required)
 - **upsert_key**: upsert API field name (string, default: null)
-- **action**: output action that is "insert", "update", "upsert" or "delete". (string, required)
-- **result_dir**: directory for resulting csv(success and error file). (string, default: "./target")
-- **version**: API version(string, default: "34.0")
+- **action**: output action that is "insert", "update", "upsert" or "delete" (string, required)
+- **result_dir**: directory for resulting csv(success and error file) (string, default: "./target")
+- **version**: API version (string, default: "34.0")
 
 ## Example
 

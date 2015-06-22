@@ -54,12 +54,12 @@ task gemspec {
 Gem::Specification.new do |spec|
   spec.name          = "${project.name}"
   spec.version       = "${project.version}"
-  spec.authors       = ["makoto tajitsu"]
+  spec.authors       = ["Makoto Tajitsu"]
   spec.summary       = %[Salesforce output plugin for Embulk]
   spec.description   = %[Dumps records to Salesforce.]
   spec.email         = ["makoto_tajitsu@hotmail.co.jp"]
   spec.licenses      = ["MIT"]
-  # TODO set this: spec.homepage      = "https://github.com/makoto_tajitsu/embulk-output-salesforce"
+  spec.homepage      = "https://github.com/tzmfreedom/embulk-output-salesforce"
 
   spec.files         = `git ls-files`.split("\n") + Dir["classpath/*.jar"]
   spec.test_files    = spec.files.grep(%r"^(test|spec)/")
