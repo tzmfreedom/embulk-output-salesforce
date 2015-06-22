@@ -22,8 +22,29 @@ Embulk output plugin to load into Salesforce.com.
 - **version**: API version (string, default: "34.0")
 
 ## Example
+The column names must be salesforce API field name.  
 
 ```yaml
+in:
+  type: file
+  path_prefix: /path/to/salesforce_
+  parser:
+    charset: UTF-8
+    newline: CRLF
+    type: csv
+    delimiter: ','
+    quote: '"'
+    escape: ''
+    skip_header_lines: 1
+    comment_line_marker: null
+    allow_extra_columns: true
+    allow_optional_columns: false
+    columns:
+    - {name: Name, type: string}
+    - {name: Date__c, type: timestamp, format: '%Y-%m-%d'}
+    - {name: DateTime__c, type: timestamp, format: '%Y-%m-%d %H:%M:%S%Z'}
+    - {name: Number__c, type: double}
+    - {name: Reference__c, type: string}
 out:
   type: salesforce
   username: hoge@example.com
