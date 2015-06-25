@@ -7,6 +7,7 @@ import com.sforce.soap.partner.GetUserInfoResult;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.SaveResult;
 import com.sforce.soap.partner.UpsertResult;
+import com.sforce.soap.partner.fault.ApiFault;
 import com.sforce.soap.partner.sobject.SObject;
 import com.sforce.ws.ConnectionException;
 import com.sforce.ws.ConnectorConfig;
@@ -231,6 +232,8 @@ public class SalesforceOutputPlugin
                     this.action(this.records);
                     logger.info("Number of processed records: {}", this.numOfSuccess + this.numOfError);
                 }
+            } catch (ApiFault ex) {
+                logger.error("API Error: {}", ex.getExceptionMessage());
             } catch (ConnectionException ex) {
                 logger.error("Connection Error: {}", ex.getMessage());
             } catch (IOException ex) {
