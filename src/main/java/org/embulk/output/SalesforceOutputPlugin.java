@@ -211,7 +211,7 @@ public class SalesforceOutputPlugin
                         }
                         @Override
                         public void longColumn(Column column) {
-                            record.addField(column.getName(), pageReader.getLong(column));
+                            columnWithReferenceCheck(column.getName(), pageReader.getLong(column));
                         }
                         @Override
                         public void booleanColumn(Column column) {
