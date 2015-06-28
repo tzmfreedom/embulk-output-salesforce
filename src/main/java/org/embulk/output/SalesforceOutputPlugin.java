@@ -194,7 +194,7 @@ public class SalesforceOutputPlugin
                     pageReader.getSchema().visitColumns(new ColumnVisitor() {
                         @Override
                         public void doubleColumn(Column column) {
-                            record.addField(column.getName(), pageReader.getDouble(column));
+                            columnWithReferenceCheck(column.getName(), pageReader.getDouble(column));
                         }
                         @Override
                         public void timestampColumn(Column column) {
@@ -208,17 +208,32 @@ public class SalesforceOutputPlugin
                         }
                         @Override
                         public void stringColumn(Column column) {
-                            record.addField(column.getName(), pageReader.getString(column));
+                            columnWithReferenceCheck(column.getName(), pageReader.getString(column));
                         }
                         @Override
                         public void longColumn(Column column) {
-                            record.addField(column.getName(), pageReader.getLong(column));
+                            columnWithReferenceCheck(column.getName(), pageReader.getLong(column));
                         }
                         @Override
                         public void booleanColumn(Column column) {
                             record.addField(column.getName(), pageReader.getBoolean(column));
                         }
-                        
+
+                        private void columnWithReferenceCheck(String name, Object value) {
+                            if (name.indexOf('.') > 0) {
+                                String[] tokens = name.split("\\.");
+                                String referencesFieldName = tokens[0];
+                                String externalIdFieldName = tokens[1];
+
+                                SObject sObjRef = new SObject();
+                                sObjRef.setType(referencesFieldName.replaceAll("__(r|R)", "__c"));
+                                sObjRef.addField(externalIdFieldName, value);
+                                record.addField(referencesFieldName, sObjRef);
+                            } else {
+                                record.addField(name, value);
+                            }
+                        }
+
                     });
                     this.records.add(record);
                     
