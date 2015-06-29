@@ -3,6 +3,9 @@ package org.embulk.output;
 import com.google.common.base.Optional;
 import com.sforce.soap.partner.Connector;
 import com.sforce.soap.partner.DeleteResult;
+import com.sforce.soap.partner.DescribeSObjectResult;
+import com.sforce.soap.partner.Field;
+import com.sforce.soap.partner.FieldType;
 import com.sforce.soap.partner.GetUserInfoResult;
 import com.sforce.soap.partner.PartnerConnection;
 import com.sforce.soap.partner.SaveResult;
@@ -18,11 +21,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.embulk.config.CommitReport;
 import org.embulk.config.Config;
 import org.embulk.config.ConfigDefault;
 import org.embulk.config.ConfigDiff;
+import org.embulk.config.ConfigException;
 import org.embulk.config.ConfigSource;
 import org.embulk.config.Task;
 import org.embulk.config.TaskSource;
@@ -46,7 +52,8 @@ public class SalesforceOutputPlugin
 {
     protected static Logger logger;
     private static PartnerConnection client = null;
-    
+    private static Map<String, String> externalIdToObjectNameMap = null;
+        
     public interface PluginTask
             extends Task
     {
@@ -113,6 +120,13 @@ public class SalesforceOutputPlugin
                 client = Connector.newConnection(connectorConfig);
                 GetUserInfoResult userInfo = client.getUserInfo();
                 logger.info("login successful with {}", userInfo.getUserName());
+                externalIdToObjectNameMap = new HashMap<>();
+                DescribeSObjectResult describeResult = client.describeSObject(task.getSObject());
+                for (Field field : describeResult.getFields()) {
+                    if (field.getType() == FieldType.reference) {
+                        externalIdToObjectNameMap.put(field.getRelationshipName(), field.getReferenceTo()[0]);
+                    }
+                }
             }
         } catch(ConnectionException ex) {
             logger.error("Login error. Please check your credentials.");
@@ -226,7 +240,12 @@ public class SalesforceOutputPlugin
                                 String externalIdFieldName = tokens[1];
 
                                 SObject sObjRef = new SObject();
-                                sObjRef.setType(referencesFieldName.replaceAll("__(r|R)", "__c"));
+                                String refFieldApiName = referencesFieldName.replaceAll("__R", "__r");
+                                if (externalIdToObjectNameMap.containsKey(refFieldApiName)) {
+                                    sObjRef.setType(externalIdToObjectNameMap.get(refFieldApiName));
+                                } else {
+                                    throw new ConfigException("Invalid Relationship Name '" + refFieldApiName + "'");
+                                }
                                 sObjRef.addField(externalIdFieldName, value);
                                 record.addField(referencesFieldName, sObjRef);
                             } else {
@@ -247,6 +266,8 @@ public class SalesforceOutputPlugin
                     this.action(this.records);
                     logger.info("Number of processed records: {}", this.numOfSuccess + this.numOfError);
                 }
+            } catch (ConfigException ex) {
+                logger.error("Configuration Error: {}", ex.getMessage());
             } catch (ApiFault ex) {
                 logger.error("API Error: {}", ex.getExceptionMessage());
             } catch (ConnectionException ex) {
