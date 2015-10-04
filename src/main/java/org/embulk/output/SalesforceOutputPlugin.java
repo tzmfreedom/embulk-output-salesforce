@@ -24,7 +24,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.embulk.config.CommitReport;
+import org.embulk.config.TaskReport;
 import org.embulk.config.Config;
 import org.embulk.config.ConfigDefault;
 import org.embulk.config.ConfigDiff;
@@ -148,7 +148,7 @@ public class SalesforceOutputPlugin
     @Override
     public void cleanup(TaskSource taskSource,
             Schema schema, int taskCount,
-            List<CommitReport> successCommitReports)
+            List<TaskReport> successTaskReports)
     {
         logger.info("logout");
         try {
@@ -295,9 +295,9 @@ public class SalesforceOutputPlugin
         }
 
         @Override
-        public CommitReport commit()
+        public TaskReport commit()
         {
-            return Exec.newCommitReport();
+            return Exec.newTaskReport();
         }
         
         private void action(List<SObject> records) throws ConnectionException, IOException{
