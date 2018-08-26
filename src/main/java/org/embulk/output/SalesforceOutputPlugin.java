@@ -212,12 +212,18 @@ public class SalesforceOutputPlugin
                         }
                         @Override
                         public void timestampColumn(Column column) {
-                            DateTime dt = new DateTime(pageReader.getTimestamp(column).getEpochSecond()*1000);
-                            Calendar cal = Calendar.getInstance();
-                            cal.clear();
-                            cal.setTimeZone(dt.getZone().toTimeZone());
-                            cal.set(dt.getYear(), dt.getMonthOfYear()-1, dt.getDayOfMonth(), 
-                                    dt.getHourOfDay(), dt.getMinuteOfHour(), dt.getSecondOfMinute());
+                            org.embulk.spi.time.Timestamp timestamp = pageReader.getTimestamp(column);
+                            Calendar cal = null;
+                            if(timestamp == null){
+                                // do nothing
+                            }else{
+                                DateTime dt = new DateTime(timestamp.getEpochSecond()*1000);
+                                cal = Calendar.getInstance();
+                                cal.clear();
+                                cal.setTimeZone(dt.getZone().toTimeZone());
+                                cal.set(dt.getYear(), dt.getMonthOfYear()-1, dt.getDayOfMonth(), 
+                                        dt.getHourOfDay(), dt.getMinuteOfHour(), dt.getSecondOfMinute());
+                            }
                             record.addField(column.getName(), cal);
                         }
                         @Override
